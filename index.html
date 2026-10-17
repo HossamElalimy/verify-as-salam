@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#123d62">
-<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="icon" href="./favicon.ico" type="image/x-icon">
 <title>منصة التحقق من التقارير | مستشفى السلام الدولي</title>
 <style>
 :root{--navy:#173e61;--navy2:#224b6b;--teal:#3c97a0;--teal-dark:#2d7c85;--rose:#c78393;--bg:#f3f7fa;--line:#e4edf1;--muted:#667d8a;--text:#233b4d;--success:#2b7a64;font-family:Tahoma,Arial,sans-serif;color:var(--text)}
@@ -38,16 +38,6 @@ button,input{font:inherit}
 .btn-primary:hover{background:#123653;transform:translateY(-1px)}
 .btn-secondary{background:#eef6f8;color:var(--navy);border:1px solid #d5e8eb}
 .btn-secondary:hover{background:#e6f1f4}
-.manual{margin-top:21px;padding-top:21px;border-top:1px solid var(--line)}
-.manual-label{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px}
-.input-row{display:flex;gap:9px}
-.code-input{flex:1;min-width:0;border:1px solid #d5e2e8;border-radius:10px;padding:12px 14px;color:var(--text);background:#fff;outline:none;direction:ltr;text-align:left}
-.code-input:focus{border-color:#7cb7bd;box-shadow:0 0 0 3px #3c97a014}
-.submit-btn{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:0 18px;font-weight:700;cursor:pointer}
-.submit-btn:hover{background:var(--teal-dark)}
-.message{display:none;margin-top:11px;font-size:12px;line-height:1.8;padding:9px 11px;border-radius:9px}
-.message.error{display:block;color:#8a3d3d;background:#fff0f0;border:1px solid #f0caca}
-.message.info{display:block;color:#2d6170;background:#eef7f8;border:1px solid #d2e8eb}
 .trust{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
 .trust-item{border:1px solid var(--line);border-radius:11px;padding:13px 10px;text-align:center;background:#fafcfd;color:#607989;font-size:11px;line-height:1.7}
 .trust-item strong{display:block;color:var(--navy);font-size:12px;margin-bottom:2px}
@@ -73,7 +63,7 @@ button,input{font:inherit}
 <div class="layout">
  <article class="paper">
   <header class="heading">
-   <img class="logo" src="logo.png" alt="شعار مستشفى السلام الدولي">
+   <img class="logo" src="./logo.png" alt="شعار مستشفى السلام الدولي">
    <div class="hospital-ar">مستشفى السلام الدولي</div>
    <div class="hospital-en" lang="en">As-Salam International Hospital</div>
    <div class="branch">فرع القاهرة الجديدة</div>
@@ -129,7 +119,14 @@ button,input{font:inherit}
  const el=id=>document.getElementById(id);
  const overlay=el('scannerOverlay'), note=el('scannerNote'), video=el('camera');
  const launch=el('scanButton'), close=el('closeScanner'), photo=el('qrPhoto');
- const form=el('verifyForm'), input=el('codeInput'), message=el('message');
+ const required={scannerOverlay:overlay,scannerNote:note,camera:video,scanButton:launch,closeScanner:close,qrPhoto:photo};
+ const missing=Object.keys(required).filter(k=>!required[k]);
+ if(missing.length){
+   const warning=document.createElement('div');
+   warning.setAttribute('role','alert'); warning.style.cssText='position:fixed;inset:auto 12px 12px;z-index:99999;background:#fff0f0;color:#8e2525;padding:15px;border:1px solid #bd6565;border-radius:12px;text-align:center';
+   warning.textContent='تعذّر تهيئة التحقق. عناصر الصفحة غير مكتملة: '+missing.join(', ')+' | QR V5';
+   document.body.appendChild(warning); return;
+ }
  let stream=null, active=false, ticket=0, busy=false, detector=null, decoderReady=false;
  let canvas=document.createElement('canvas'), ctx=canvas.getContext('2d',{willReadFrequently:true});
  const tell=s=>{note.textContent=s;};
@@ -158,13 +155,6 @@ button,input{font:inherit}
    location.assign(code==='815970'?'/815970':'/404.html');
    return true;
  }
- form.addEventListener('submit',e=>{
-   e.preventDefault();
-   if(!/^\d{4,12}$/.test(input.value.trim())){
-     message.className='message error';message.textContent='يرجى إدخال رقم تحقق صحيح من 4 إلى 12 رقمًا.';return;
-   }
-   openValue(input.value.trim());
- });
  function load(src){return new Promise((ok,fail)=>{
    const tag=document.createElement('script');tag.src=src;tag.onload=ok;tag.onerror=()=>fail(new Error('decoder_download'));
    document.head.appendChild(tag);
@@ -253,9 +243,10 @@ button,input{font:inherit}
    }catch(e){tell('تعذّر قراءة الصورة. يرجى التأكد من الاتصال بالإنترنت ثم المحاولة.');}
    photo.value='';
  });
- window.salamScannerVersion='camera-v3-20261017';
+ window.salamScannerVersion='qr-v4-20261017';
 })();
 </script>
-<!-- camera-v3-20261017 -->
+<!-- qr-v4-20261017 -->
+<div id="buildVersion" style="position:fixed;bottom:6px;left:8px;z-index:3;color:#506d80;font-size:10px;background:#ffffffd9;border-radius:4px;padding:3px 6px" dir="ltr">QR V5 · 2026-10-17</div>
 </body>
 </html>
