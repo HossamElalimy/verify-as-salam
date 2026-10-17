@@ -100,7 +100,7 @@ button,input{font:inherit}
      <button class="btn btn-primary" id="scanButton" type="button">فتح الكاميرا ومسح QR</button>
     </div>
 
-  
+   
    </section>
 
    <section class="trust" aria-label="معلومات عن خدمة التحقق">
@@ -162,7 +162,7 @@ button,input{font:inherit}
      return false;
    }
    // Only navigate inside this website. Unknown numbers display the custom not-found page.
-   window.location.assign('/' + encodeURIComponent(code));
+   window.location.assign(code === '815970' ? '/815970' : '/404.html');
    return true;
  }
 
@@ -255,16 +255,20 @@ button,input{font:inherit}
  }
 
  scanButton.addEventListener('click', async () => {
-   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-     showMessage('الكاميرا تحتاج فتح الموقع عبر HTTPS ومتصفح يدعم الكاميرا. يمكنك إدخال رقم التحقق يدويًا.');
+   if (overlay.classList.contains('open')) return;
+   // Show immediate feedback before the browser camera permission dialog.
+   overlay.classList.add('open');
+   overlay.setAttribute('aria-hidden', 'false');
+   scannerNote.textContent = 'جارٍ طلب إذن الكاميرا، يُرجى الموافقة على السماح بالتصوير.';
+   if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+     scannerNote.textContent = 'الكاميرا غير متاحة. افتح الموقع عبر HTTPS من Safari أو Chrome، ثم اسمح باستخدام الكاميرا.';
      return;
    }
-   if (overlay.classList.contains('open')) return;
    scanButton.disabled = true;
    showMessage('');
    const currentSession = ++session;
    try {
-     // Permission request is initiated directly by the user tapping the button.
+     // Trigger the permission prompt during the original user gesture.
      const cameraStream = await navigator.mediaDevices.getUserMedia({
        video:{facingMode:{ideal:'environment'}}, audio:false
      });
@@ -274,21 +278,29 @@ button,input{font:inherit}
      }
      stream = cameraStream;
      video.srcObject = stream;
-     overlay.classList.add('open');
-     overlay.setAttribute('aria-hidden', 'false');
-     scannerNote.textContent = 'ضع رمز QR داخل الإطار حتى تتم قراءته تلقائيًا.';
+     scannerNote.textContent = 'جارٍ تشغيل الكاميرا...';
      await video.play();
+     scannerNote.textContent = 'جارٍ تجهيز قارئ QR...';
      await prepareDecoder();
      if (currentSession !== session) return;
+     scannerNote.textContent = 'وجّه الكاميرا إلى رمز QR حتى تتم قراءته تلقائيًا.';
      scanning = true;
      lastScan = 0;
      requestAnimationFrame(() => scanLoop(currentSession));
    } catch (error) {
      if (currentSession === session) {
-       stopScanner();
-       showMessage(error && error.name === 'NotAllowedError'
-         ? 'تم رفض إذن الكاميرا. اسمح باستخدام الكاميرا من إعدادات المتصفح ثم حاول مجددًا.'
-         : 'تعذر تشغيل الكاميرا أو تحميل قارئ QR. تحقق من الاتصال والاذن، أو أدخل الرقم يدويًا.');
+       // Keep the dialog visible, to make all permission and network errors obvious.
+       if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+       video.pause();
+       video.srcObject = null;
+       const name = error && error.name;
+       scannerNote.textContent = name === 'NotAllowedError' || name === 'PermissionDeniedError'
+         ? 'تم رفض إذن الكاميرا. فعّل صلاحية الكاميرا للموقع من إعدادات المتصفح وحاول مرة أخرى.'
+         : name === 'NotFoundError' || name === 'DevicesNotFoundError'
+           ? 'لم يتم العثور على كاميرا متاحة على هذا الجهاز.'
+           : name === 'NotReadableError'
+             ? 'الكاميرا مشغولة بتطبيق آخر. أغلق التطبيقات التي تستخدم الكاميرا وحاول مرة أخرى.'
+             : 'تعذّر تشغيل قارئ QR. جرّب تحديث الصفحة، أو استخدم التحقق اليدوي.';
      }
    } finally {
      scanButton.disabled = false;
