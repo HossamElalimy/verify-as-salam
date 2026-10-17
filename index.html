@@ -84,7 +84,7 @@ button,input{font:inherit}
   <main class="body">
    <section class="welcome">
     <h2>أهلاً بكم في منصة التحقق الإلكترونية</h2>
-    <p>يمكنكم من خلال هذه الصفحة التحقق من صحة وحالة التقارير والإفادات الصادرة عن مستشفى السلام الدولي، وذلك باستخدام رمز الاستجابة السريعة الموجود على المستند أو بإدخال رقم التحقق يدويًا.</p>
+    <p>يمكنكم من خلال هذه الصفحة التحقق من صحة وحالة التقارير والإفادات الصادرة عن مستشفى السلام الدولي، وذلك باستخدام رمز الاستجابة السريعة الموجود على المستند.</p>
    </section>
 
    <section class="verify-card" aria-labelledby="verify-title">
@@ -100,7 +100,7 @@ button,input{font:inherit}
      <button class="btn btn-primary" id="scanButton" type="button">فتح الكاميرا ومسح QR</button>
     </div>
 
-   
+  
    </section>
 
    <section class="trust" aria-label="معلومات عن خدمة التحقق">
@@ -135,6 +135,10 @@ button,input{font:inherit}
  let stream = null;
  let scanning = false;
  let detector = null;
+ let scanCanvas = null;
+ let scanCtx = null;
+ let lastScan = 0;
+ let session = 0;
 
  function showMessage(text, type='error') {
    message.className = 'message ' + type;
@@ -154,10 +158,11 @@ button,input{font:inherit}
      if (match) code = match[1];
    }
    if (!code) {
-     showMessage('تعذر التعرف على رقم تحقق صالح. يرجى التأكد من الرمز والمحاولة مرة أخرى.');
+     scannerNote.textContent = 'الرمز المقروء لا يحتوي على رقم تحقق صالح. حاول مرة أخرى.';
      return false;
    }
-   window.location.href = '/' + encodeURIComponent(code);
+   // Only navigate inside this website. Unknown numbers display the custom not-found page.
+   window.location.assign('/' + encodeURIComponent(code));
    return true;
  }
 
@@ -172,58 +177,128 @@ button,input{font:inherit}
    openCode(value);
  });
 
- async function stopScanner() {
-   scanning = false;
-   if (stream) {
-     stream.getTracks().forEach(track => track.stop());
-     stream = null;
+ function loadScript(src) {
+   return new Promise((resolve, reject) => {
+     const script = document.createElement('script');
+     script.src = src;
+     script.async = true;
+     script.onload = resolve;
+     script.onerror = reject;
+     document.head.appendChild(script);
+   });
+ }
+
+ async function prepareDecoder() {
+   if ('BarcodeDetector' in window) {
+     try {
+       const formats = await BarcodeDetector.getSupportedFormats();
+       if (formats.includes('qr_code')) {
+         detector = new BarcodeDetector({formats:['qr_code']});
+         return;
+       }
+     } catch (_) {}
    }
+   // jsQR fallback supports Safari, Firefox, and browsers without BarcodeDetector.
+   if (typeof window.jsQR !== 'function') {
+     try {
+       await loadScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js');
+     } catch (_) {
+       await loadScript('https://unpkg.com/jsqr@1.4.0/dist/jsQR.js');
+     }
+   }
+   if (typeof window.jsQR !== 'function') throw new Error('QR decoder unavailable');
+   scanCanvas = document.createElement('canvas');
+   scanCtx = scanCanvas.getContext('2d', {willReadFrequently:true});
+   if (!scanCtx) throw new Error('Canvas unavailable');
+ }
+
+ function stopScanner() {
+   scanning = false;
+   session++;
+   const previous = stream;
+   stream = null;
+   if (previous) previous.getTracks().forEach(track => track.stop());
+   video.pause();
    video.srcObject = null;
    overlay.classList.remove('open');
    overlay.setAttribute('aria-hidden', 'true');
  }
 
- async function scanLoop() {
-   if (!scanning || !detector) return;
-   try {
-     const codes = await detector.detect(video);
-     if (codes && codes.length) {
-       const raw = codes[0].rawValue;
-       scanning = false;
-       scannerNote.textContent = 'تمت قراءة الرمز، جارٍ فتح نتيجة التحقق...';
-       if (!openCode(raw)) scanning = true;
-     }
-   } catch (_) {}
-   if (scanning) requestAnimationFrame(scanLoop);
+ async function scanLoop(currentSession) {
+   if (!scanning || currentSession !== session) return;
+   const now = performance.now();
+   // Limit decoding frequency to keep mobile phones responsive and cool.
+   if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && now - lastScan > 140) {
+     lastScan = now;
+     try {
+       let raw = null;
+       if (detector) {
+         const results = await detector.detect(video);
+         if (results.length) raw = results[0].rawValue;
+       } else if (scanCtx && video.videoWidth && video.videoHeight) {
+         const scale = Math.min(1, 800 / Math.max(video.videoWidth, video.videoHeight));
+         scanCanvas.width = Math.round(video.videoWidth * scale);
+         scanCanvas.height = Math.round(video.videoHeight * scale);
+         scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
+         const image = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+         const result = window.jsQR(image.data, image.width, image.height, {inversionAttempts:'attemptBoth'});
+         if (result) raw = result.data;
+       }
+       if (currentSession !== session || !scanning) return;
+       if (raw) {
+         scannerNote.textContent = 'تمت قراءة الرمز، جارٍ فتح نتيجة التحقق...';
+         if (openCode(raw)) { stopScanner(); return; }
+       }
+     } catch (_) {}
+   }
+   if (scanning && currentSession === session) requestAnimationFrame(() => scanLoop(currentSession));
  }
 
  scanButton.addEventListener('click', async () => {
    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-     showMessage('الكاميرا غير متاحة في هذا المتصفح. يمكنك إدخال رقم التحقق يدويًا.');
+     showMessage('الكاميرا تحتاج فتح الموقع عبر HTTPS ومتصفح يدعم الكاميرا. يمكنك إدخال رقم التحقق يدويًا.');
      return;
    }
-   if (!('BarcodeDetector' in window)) {
-     showMessage('مسح QR بالكاميرا غير مدعوم على هذا المتصفح. يمكنك استخدام كاميرا الهاتف لفتح رمز QR مباشرة أو إدخال رقم التحقق يدويًا.', 'info');
-     return;
-   }
+   if (overlay.classList.contains('open')) return;
+   scanButton.disabled = true;
+   showMessage('');
+   const currentSession = ++session;
    try {
-     const formats = await BarcodeDetector.getSupportedFormats();
-     if (!formats.includes('qr_code')) throw new Error('QR not supported');
-     detector = new BarcodeDetector({formats:['qr_code']});
-     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+     // Permission request is initiated directly by the user tapping the button.
+     const cameraStream = await navigator.mediaDevices.getUserMedia({
+       video:{facingMode:{ideal:'environment'}}, audio:false
+     });
+     if (currentSession !== session) {
+       cameraStream.getTracks().forEach(track => track.stop());
+       return;
+     }
+     stream = cameraStream;
      video.srcObject = stream;
      overlay.classList.add('open');
      overlay.setAttribute('aria-hidden', 'false');
      scannerNote.textContent = 'ضع رمز QR داخل الإطار حتى تتم قراءته تلقائيًا.';
      await video.play();
+     await prepareDecoder();
+     if (currentSession !== session) return;
      scanning = true;
-     requestAnimationFrame(scanLoop);
-   } catch (_) {
-     await stopScanner();
-     showMessage('تعذر تشغيل الكاميرا أو قراءة QR. اسمح للموقع باستخدام الكاميرا أو أدخل رقم التحقق يدويًا.');
+     lastScan = 0;
+     requestAnimationFrame(() => scanLoop(currentSession));
+   } catch (error) {
+     if (currentSession === session) {
+       stopScanner();
+       showMessage(error && error.name === 'NotAllowedError'
+         ? 'تم رفض إذن الكاميرا. اسمح باستخدام الكاميرا من إعدادات المتصفح ثم حاول مجددًا.'
+         : 'تعذر تشغيل الكاميرا أو تحميل قارئ QR. تحقق من الاتصال والاذن، أو أدخل الرقم يدويًا.');
+     }
+   } finally {
+     scanButton.disabled = false;
    }
  });
 
+ window.addEventListener('pagehide', stopScanner);
+ document.addEventListener('visibilitychange', () => {
+   if (document.hidden && overlay.classList.contains('open')) stopScanner();
+ });
  closeButton.addEventListener('click', stopScanner);
  overlay.addEventListener('click', (event) => { if (event.target === overlay) stopScanner(); });
  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && overlay.classList.contains('open')) stopScanner(); });
