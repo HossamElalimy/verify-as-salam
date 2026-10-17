@@ -97,7 +97,7 @@ button,input{font:inherit}
     <h3 id="verify-title">التقط رمز QR للتحقق من حالة التقرير</h3>
     <p class="hint">وجّه كاميرا الهاتف إلى رمز QR المطبوع على التقرير. سيتم فتح صفحة التحقق الخاصة بالمستند تلقائيًا بعد قراءة الرمز.</p>
     <div class="actions">
-     <button class="btn btn-primary" id="scanButton" type="button">فتح الكاميرا ومسح QR</button>
+     <button class="btn btn-primary" id="scanButton" type="button" onclick="window.launchSalamScanner && window.launchSalamScanner()">فتح الكاميرا ومسح QR</button>
     </div>
 
    
@@ -118,11 +118,20 @@ button,input{font:inherit}
  <div class="scanner-box" role="dialog" aria-modal="true" aria-labelledby="scannerTitle">
   <div class="scanner-head"><strong id="scannerTitle">مسح رمز QR</strong><button class="close" id="closeScanner" type="button" aria-label="إغلاق">×</button></div>
   <div class="camera-wrap"><video id="camera" playsinline muted></video><div class="scan-frame" aria-hidden="true"></div></div>
-  <div class="scanner-note" id="scannerNote">ضع رمز QR داخل الإطار حتى تتم قراءته تلقائيًا.</div>
+  <div class="scanner-note" id="scannerNote" role="status" aria-live="polite">ضع رمز QR داخل الإطار حتى تتم قراءته تلقائيًا.</div><div class="scanner-note"><label for="qrPhoto" style="display:inline-block;padding:11px 18px;border-radius:9px;background:#edf5f6;color:#173e61;font-weight:bold;cursor:pointer">تصوير رمز QR بالكاميرا بدل البث المباشر</label><input id="qrPhoto" type="file" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0" aria-label="تصوير رمز QR"></div>
  </div>
 </div>
 
 <script>
+// This tiny bootstrap runs before the full scanner so a tap always gives visible feedback.
+window.launchSalamScanner = function () {
+ const overlay = document.getElementById('scannerOverlay');
+ const note = document.getElementById('scannerNote');
+ if (overlay) { overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+ if (note) note.textContent = 'جارٍ فتح الكاميرا...';
+ if (typeof window.startSalamScanner === 'function') window.startSalamScanner();
+ else if (note) note.textContent = 'تعذّر تهيئة قارئ QR. حدّث الصفحة أو افتح الرابط مباشرة من Safari.';
+};
 (() => {
  const form = document.getElementById('verifyForm');
  const input = document.getElementById('codeInput');
@@ -132,6 +141,7 @@ button,input{font:inherit}
  const closeButton = document.getElementById('closeScanner');
  const video = document.getElementById('camera');
  const scannerNote = document.getElementById('scannerNote');
+ const qrPhoto = document.getElementById('qrPhoto');
  let stream = null;
  let scanning = false;
  let detector = null;
@@ -254,8 +264,8 @@ button,input{font:inherit}
    if (scanning && currentSession === session) requestAnimationFrame(() => scanLoop(currentSession));
  }
 
- scanButton.addEventListener('click', async () => {
-   if (overlay.classList.contains('open')) return;
+ window.startSalamScanner = async function () {
+   if (scanning || scanButton.disabled) return;
    // Show immediate feedback before the browser camera permission dialog.
    overlay.classList.add('open');
    overlay.setAttribute('aria-hidden', 'false');
@@ -305,8 +315,34 @@ button,input{font:inherit}
    } finally {
      scanButton.disabled = false;
    }
- });
+ };
 
+ qrPhoto.addEventListener('change', async () => {
+   const file = qrPhoto.files && qrPhoto.files[0];
+   if (!file) return;
+   overlay.classList.add('open');
+   scannerNote.textContent = 'جارٍ تحليل صورة رمز QR...';
+   try {
+     await prepareDecoder();
+     const blobUrl = URL.createObjectURL(file);
+     const img = new Image();
+     try {
+       await new Promise((resolve,reject) => { img.onload=resolve; img.onerror=reject; img.src=blobUrl; });
+       const canvas = document.createElement('canvas');
+       const scale = Math.min(1, 1200/Math.max(img.naturalWidth,img.naturalHeight));
+       canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+       canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+       const ctx=canvas.getContext('2d',{willReadFrequently:true});
+       ctx.drawImage(img,0,0,canvas.width,canvas.height);
+       let raw=null;
+       if (detector) { const result=await detector.detect(canvas); if(result.length) raw=result[0].rawValue; }
+       else { const data=ctx.getImageData(0,0,canvas.width,canvas.height);const result=window.jsQR(data.data,data.width,data.height,{inversionAttempts:'attemptBoth'});if(result)raw=result.data; }
+       if(raw) openCode(raw);
+       else scannerNote.textContent='لم أتمكن من قراءة QR من الصورة. حاول تصويره بوضوح وبإضاءة جيدة.';
+     } finally { URL.revokeObjectURL(blobUrl); }
+   } catch(e) { scannerNote.textContent='تعذّر تحليل الصورة. تأكد من اتصال الإنترنت ثم حاول مجددًا.'; }
+   qrPhoto.value='';
+ });
  window.addEventListener('pagehide', stopScanner);
  document.addEventListener('visibilitychange', () => {
    if (document.hidden && overlay.classList.contains('open')) stopScanner();
@@ -316,5 +352,6 @@ button,input{font:inherit}
  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && overlay.classList.contains('open')) stopScanner(); });
 })();
 </script>
+<!-- safari-scanner-fix-20261017 -->
 </body>
 </html>
