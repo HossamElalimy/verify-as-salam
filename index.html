@@ -6,42 +6,228 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#123d62">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
-<title>معاينة بيانات إفادة الإقامة | مستشفى السلام الدولي</title>
+<title>منصة التحقق من التقارير | مستشفى السلام الدولي</title>
 <style>
-:root{--navy:#173e61;--navy2:#224b6b;--teal:#3c97a0;--rose:#c78393;--bg:#f3f7fa;--line:#e4edf1;--muted:#667d8a;--text:#233b4d;font-family:Tahoma,Arial,sans-serif;color:var(--text)}*{box-sizing:border-box}body{margin:0;background:linear-gradient(150deg,#edf6f8,#f7f9fb 45%,#f1f5f8);min-height:100vh}.ribbon{height:7px;background:linear-gradient(90deg,var(--navy),var(--teal),#7db8be,var(--rose))}.layout{max-width:850px;margin:0 auto;padding:32px 18px 45px}.notice{padding:15px 20px;border-radius:12px;border:1px solid #e6bd6a;background:#fff6de;color:#6e511b;line-height:1.85;text-align:center;font-size:13px;margin-bottom:18px}.notice strong{font-size:15px}.notice-en{display:block;direction:ltr;font-size:11px;letter-spacing:.3px;margin-top:3px}.paper{background:white;border:1px solid #e1e9ee;box-shadow:0 18px 60px #123d6210;border-radius:20px;overflow:hidden}.heading{padding:33px 35px 26px;text-align:center;position:relative;background:linear-gradient(180deg,#fff 60%,#fafcfd)}.heading:after{content:"";position:absolute;bottom:0;right:10%;left:10%;height:1px;background:linear-gradient(90deg,transparent,#dbe8eb,transparent)}.logo{width:205px;max-width:55%;object-fit:contain;height:auto}.hospital-ar{font-size:21px;font-weight:700;color:var(--navy);margin:9px 0 3px}.hospital-en{direction:ltr;font-size:14px;font-weight:700;color:var(--navy2)}.branch{font-size:14px;color:var(--teal);font-weight:bold;margin:8px 0 0}.document-name{font-weight:bold;color:var(--navy);font-size:23px;margin:25px 0 5px}.document-en{direction:ltr;letter-spacing:1px;font-size:11px;color:var(--teal);font-weight:bold}.body{padding:30px 44px 36px}.status{display:flex;gap:14px;align-items:flex-start;background:#eef6f8;border:1px solid #d4e8eb;border-radius:13px;padding:16px 18px;margin-bottom:29px}.status-icon{width:37px;height:37px;border-radius:50%;display:grid;place-items:center;flex:none;background:#d9ecf0;color:#286b79;font-weight:bold;font-size:22px}.status-title{font-weight:700;color:var(--navy);font-size:15px}.status-note{line-height:1.85;font-size:12px;color:#527282;margin-top:5px}.section-title{font-size:15px;color:var(--navy);font-weight:bold;display:flex;align-items:center;gap:9px;margin:24px 0 10px}.section-title:before{content:"";width:4px;height:19px;border-radius:4px;background:var(--teal)}.details{border:1px solid var(--line);border-radius:13px;overflow:hidden}.detail{display:grid;grid-template-columns:minmax(145px,40%) 1fr;gap:12px;align-items:center;padding:15px 19px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.8}.detail:nth-child(even){background:#fafcfd}.detail:last-child{border-bottom:0}.label{color:#607989}.value{font-weight:700;color:#1d3f5c}.ltr{direction:ltr;unicode-bidi:embed;display:inline-block}.privacy{background:#f7fafb;border:1px solid var(--line);border-radius:12px;padding:17px 18px;color:#5e7785;font-size:12px;line-height:2;margin-top:24px}.footer{text-align:center;color:#77909e;line-height:1.9;font-size:12px;margin:22px 10px}.source{display:block;font-size:11px;color:#7c909a;margin-top:7px}@media(max-width:590px){.layout{padding:15px 11px 28px}.paper{border-radius:15px}.heading{padding:26px 16px 23px}.logo{width:180px}.hospital-ar{font-size:18px}.hospital-en{font-size:12px}.document-name{font-size:20px}.body{padding:22px 17px 26px}.detail{padding:13px 12px;grid-template-columns:minmax(120px,40%) 1fr;font-size:12px;gap:9px}.status{padding:14px}.notice{padding:12px}.footer{font-size:11px}}
+:root{--navy:#173e61;--navy2:#224b6b;--teal:#3c97a0;--teal-dark:#2d7c85;--rose:#c78393;--bg:#f3f7fa;--line:#e4edf1;--muted:#667d8a;--text:#233b4d;--success:#2b7a64;font-family:Tahoma,Arial,sans-serif;color:var(--text)}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(150deg,#edf6f8,#f7f9fb 45%,#f1f5f8);min-height:100vh}
+button,input{font:inherit}
+.ribbon{height:7px;background:linear-gradient(90deg,var(--navy),var(--teal),#7db8be,var(--rose))}
+.layout{max-width:850px;margin:0 auto;padding:32px 18px 45px}
+.paper{background:#fff;border:1px solid #e1e9ee;box-shadow:0 18px 60px #123d6210;border-radius:20px;overflow:hidden}
+.heading{padding:34px 35px 29px;text-align:center;position:relative;background:linear-gradient(180deg,#fff 60%,#fafcfd)}
+.heading:after{content:"";position:absolute;bottom:0;right:10%;left:10%;height:1px;background:linear-gradient(90deg,transparent,#dbe8eb,transparent)}
+.logo{width:205px;max-width:55%;object-fit:contain;height:auto}
+.hospital-ar{font-size:21px;font-weight:700;color:var(--navy);margin:9px 0 3px}
+.hospital-en{direction:ltr;font-size:14px;font-weight:700;color:var(--navy2)}
+.branch{font-size:14px;color:var(--teal);font-weight:bold;margin:8px 0 0}
+.portal-title{font-weight:bold;color:var(--navy);font-size:25px;margin:26px 0 7px}
+.portal-en{direction:ltr;letter-spacing:1px;font-size:11px;color:var(--teal);font-weight:bold}
+.body{padding:34px 44px 39px}
+.welcome{text-align:center;max-width:650px;margin:0 auto 28px}
+.welcome h2{margin:0 0 10px;color:var(--navy);font-size:21px;line-height:1.7}
+.welcome p{margin:0;color:#607989;line-height:2;font-size:14px}
+.verify-card{border:1px solid var(--line);border-radius:16px;padding:25px;background:linear-gradient(180deg,#fbfdfe,#fff);box-shadow:0 8px 24px #173e6108}
+.qr-icon{width:64px;height:64px;border-radius:18px;margin:0 auto 14px;display:grid;place-items:center;background:#e8f4f5;color:var(--teal-dark)}
+.qr-icon svg{width:34px;height:34px}
+.verify-card h3{text-align:center;margin:0;color:var(--navy);font-size:18px}
+.verify-card .hint{text-align:center;color:#607989;font-size:13px;line-height:1.9;margin:7px auto 20px;max-width:550px}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.btn{border:0;border-radius:11px;padding:12px 19px;cursor:pointer;font-weight:700;transition:.18s ease;min-height:46px}
+.btn-primary{background:var(--navy);color:#fff;box-shadow:0 8px 18px #173e6125}
+.btn-primary:hover{background:#123653;transform:translateY(-1px)}
+.btn-secondary{background:#eef6f8;color:var(--navy);border:1px solid #d5e8eb}
+.btn-secondary:hover{background:#e6f1f4}
+.manual{margin-top:21px;padding-top:21px;border-top:1px solid var(--line)}
+.manual-label{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.input-row{display:flex;gap:9px}
+.code-input{flex:1;min-width:0;border:1px solid #d5e2e8;border-radius:10px;padding:12px 14px;color:var(--text);background:#fff;outline:none;direction:ltr;text-align:left}
+.code-input:focus{border-color:#7cb7bd;box-shadow:0 0 0 3px #3c97a014}
+.submit-btn{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:0 18px;font-weight:700;cursor:pointer}
+.submit-btn:hover{background:var(--teal-dark)}
+.message{display:none;margin-top:11px;font-size:12px;line-height:1.8;padding:9px 11px;border-radius:9px}
+.message.error{display:block;color:#8a3d3d;background:#fff0f0;border:1px solid #f0caca}
+.message.info{display:block;color:#2d6170;background:#eef7f8;border:1px solid #d2e8eb}
+.trust{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+.trust-item{border:1px solid var(--line);border-radius:11px;padding:13px 10px;text-align:center;background:#fafcfd;color:#607989;font-size:11px;line-height:1.7}
+.trust-item strong{display:block;color:var(--navy);font-size:12px;margin-bottom:2px}
+.footer{text-align:center;color:#77909e;line-height:1.9;font-size:12px;margin:22px 10px 0}
+.scanner-overlay{position:fixed;inset:0;background:#0d2231dd;z-index:50;display:none;align-items:center;justify-content:center;padding:18px}
+.scanner-overlay.open{display:flex}
+.scanner-box{width:min(520px,100%);background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 24px 70px #0006}
+.scanner-head{padding:17px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.scanner-head strong{color:var(--navy);font-size:15px}
+.close{border:0;background:#eef3f5;color:var(--navy);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:20px;line-height:1}
+.camera-wrap{position:relative;background:#0a1319;aspect-ratio:1/1;max-height:65vh;overflow:hidden}
+#camera{width:100%;height:100%;object-fit:cover;display:block}
+.scan-frame{position:absolute;inset:13%;border:2px solid #fff;border-radius:18px;box-shadow:0 0 0 999px #0004}
+.scan-frame:before,.scan-frame:after{content:"";position:absolute;width:38px;height:38px;border-color:#6cc6cd;border-style:solid}
+.scan-frame:before{right:-3px;top:-3px;border-width:4px 4px 0 0;border-radius:9px 9px 0 0}
+.scan-frame:after{left:-3px;bottom:-3px;border-width:0 0 4px 4px;border-radius:0 0 9px 9px}
+.scanner-note{padding:14px 18px;text-align:center;color:#607989;font-size:12px;line-height:1.8}
+@media(max-width:590px){.layout{padding:15px 11px 28px}.paper{border-radius:15px}.heading{padding:26px 16px 23px}.logo{width:180px}.hospital-ar{font-size:18px}.hospital-en{font-size:12px}.portal-title{font-size:21px}.body{padding:24px 17px 28px}.welcome h2{font-size:19px}.verify-card{padding:20px 15px}.input-row{flex-direction:column}.submit-btn{min-height:44px}.trust{grid-template-columns:1fr}.footer{font-size:11px}}
 </style>
 </head>
 <body>
 <div class="ribbon"></div>
 <div class="layout">
- 
  <article class="paper">
- <header class="heading">
-  <img class="logo" src="logo.png" alt="شعار مستشفى السلام الدولي كما ورد في المستند المرجعي">
-  <div class="hospital-ar">مستشفى السلام الدولي</div>
-  <div class="hospital-en" lang="en">As-Salam International Hospital</div>
-  <div class="branch">فرع القاهرة الجديدة</div>
-  <h1 class="document-name">إفادة حجز وإقامة بالمستشفى</h1>
-  <div class="document-en" lang="en">INPATIENT ADMISSION CONFIRMATION</div>
- </header>
- <main class="body">
- 
-  <div class="section-title">بيانات الإفادة</div>
-  <div class="details">
-   <div class="detail"><span class="label">نوع المستند</span><span class="value">إفادة حجز وإقامة بالمستشفى</span></div>
-   <div class="detail"><span class="label">تاريخ الإفادة</span><span class="value"><bdi>16 / 10 / 2026</bdi></span></div>
-   <div class="detail"><span class="label">المريض/ـة</span><span class="value">جنى حسام محمد عز الدين</span></div>
-   <div class="detail"><span class="label">الرقم الطبي / رقم الملف</span><span class="value"><span class="ltr">815970</span></span></div>
-   <div class="detail"><span class="label">القسم العلاجي</span><span class="value">قسم النساء والتوليد</span></div>
-   <div class="detail"><span class="label">تاريخ الدخول</span><span class="value"><bdi>15 / 10 / 2026</bdi></span></div>
-   <div class="detail"><span class="label">وقت الدخول</span><span class="value"><span class="ltr">18:40</span></span></div>
-   <div class="detail"><span class="label">الوحدة المحجوز بها</span><span class="value">العناية المركزة <span class="ltr">204B</span></span></div>
-   <div class="detail"><span class="label">حالة الحجز عند إصدار الإفادة</span><span class="value">ما زالت المريضة محجوزة بالمستشفى وتحت الرعاية الطبية.</span></div>
-  </div>
+  <header class="heading">
+   <img class="logo" src="logo.png" alt="شعار مستشفى السلام الدولي">
+   <div class="hospital-ar">مستشفى السلام الدولي</div>
+   <div class="hospital-en" lang="en">As-Salam International Hospital</div>
+   <div class="branch">فرع القاهرة الجديدة</div>
+   <h1 class="portal-title">منصة التحقق من التقارير والإفادات الطبية</h1>
+   <div class="portal-en" lang="en">MEDICAL DOCUMENT VERIFICATION PORTAL</div>
+  </header>
 
- </main>
+  <main class="body">
+   <section class="welcome">
+    <h2>أهلاً بكم في منصة التحقق الإلكترونية</h2>
+    <p>يمكنكم من خلال هذه الصفحة التحقق من صحة وحالة التقارير والإفادات الصادرة عن مستشفى السلام الدولي، وذلك باستخدام رمز الاستجابة السريعة الموجود على المستند أو بإدخال رقم التحقق يدويًا.</p>
+   </section>
+
+   <section class="verify-card" aria-labelledby="verify-title">
+    <div class="qr-icon" aria-hidden="true">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="15" y="3" width="6" height="6" rx="1"></rect><rect x="3" y="15" width="6" height="6" rx="1"></rect>
+      <path d="M15 15h2v2h-2zM19 15h2M21 15v3M15 19v2M17 21h2M19 19h2v2"></path>
+     </svg>
+    </div>
+    <h3 id="verify-title">التقط رمز QR للتحقق من حالة التقرير</h3>
+    <p class="hint">وجّه كاميرا الهاتف إلى رمز QR المطبوع على التقرير. سيتم فتح صفحة التحقق الخاصة بالمستند تلقائيًا بعد قراءة الرمز.</p>
+    <div class="actions">
+     <button class="btn btn-primary" id="scanButton" type="button">فتح الكاميرا ومسح QR</button>
+    </div>
+
+   
+   </section>
+
+   <section class="trust" aria-label="معلومات عن خدمة التحقق">
+    <div class="trust-item"><strong>تحقق إلكتروني</strong>عرض بيانات المستند المرتبط برمز التحقق.</div>
+    <div class="trust-item"><strong>حماية الخصوصية</strong>لا يتم طلب بيانات شخصية إضافية لإجراء التحقق.</div>
+    <div class="trust-item"><strong>مرجع رسمي</strong>تعتمد نتيجة التحقق على البيانات المعروضة عبر هذه المنصة.</div>
+   </section>
+
+   <div class="footer">هذه الخدمة مخصصة للتحقق من التقارير والإفادات الصادرة عن مستشفى السلام الدولي.</div>
+  </main>
  </article>
-
 </div>
+
+<div class="scanner-overlay" id="scannerOverlay" aria-hidden="true">
+ <div class="scanner-box" role="dialog" aria-modal="true" aria-labelledby="scannerTitle">
+  <div class="scanner-head"><strong id="scannerTitle">مسح رمز QR</strong><button class="close" id="closeScanner" type="button" aria-label="إغلاق">×</button></div>
+  <div class="camera-wrap"><video id="camera" playsinline muted></video><div class="scan-frame" aria-hidden="true"></div></div>
+  <div class="scanner-note" id="scannerNote">ضع رمز QR داخل الإطار حتى تتم قراءته تلقائيًا.</div>
+ </div>
+</div>
+
+<script>
+(() => {
+ const form = document.getElementById('verifyForm');
+ const input = document.getElementById('codeInput');
+ const message = document.getElementById('message');
+ const scanButton = document.getElementById('scanButton');
+ const overlay = document.getElementById('scannerOverlay');
+ const closeButton = document.getElementById('closeScanner');
+ const video = document.getElementById('camera');
+ const scannerNote = document.getElementById('scannerNote');
+ let stream = null;
+ let scanning = false;
+ let detector = null;
+
+ function showMessage(text, type='error') {
+   message.className = 'message ' + type;
+   message.textContent = text;
+ }
+
+ function openCode(raw) {
+   const value = String(raw || '').trim();
+   let code = '';
+   try {
+     const url = new URL(value, window.location.origin);
+     const match = url.pathname.match(/\/(\d+)\/?$/);
+     if (match) code = match[1];
+   } catch (_) {}
+   if (!code) {
+     const match = value.match(/\b(\d{4,12})\b/);
+     if (match) code = match[1];
+   }
+   if (!code) {
+     showMessage('تعذر التعرف على رقم تحقق صالح. يرجى التأكد من الرمز والمحاولة مرة أخرى.');
+     return false;
+   }
+   window.location.href = '/' + encodeURIComponent(code);
+   return true;
+ }
+
+ form.addEventListener('submit', (event) => {
+   event.preventDefault();
+   const value = input.value.trim();
+   if (!/^\d{4,12}$/.test(value)) {
+     showMessage('يرجى إدخال رقم تحقق صحيح مكوّن من أرقام فقط.');
+     input.focus();
+     return;
+   }
+   openCode(value);
+ });
+
+ async function stopScanner() {
+   scanning = false;
+   if (stream) {
+     stream.getTracks().forEach(track => track.stop());
+     stream = null;
+   }
+   video.srcObject = null;
+   overlay.classList.remove('open');
+   overlay.setAttribute('aria-hidden', 'true');
+ }
+
+ async function scanLoop() {
+   if (!scanning || !detector) return;
+   try {
+     const codes = await detector.detect(video);
+     if (codes && codes.length) {
+       const raw = codes[0].rawValue;
+       scanning = false;
+       scannerNote.textContent = 'تمت قراءة الرمز، جارٍ فتح نتيجة التحقق...';
+       if (!openCode(raw)) scanning = true;
+     }
+   } catch (_) {}
+   if (scanning) requestAnimationFrame(scanLoop);
+ }
+
+ scanButton.addEventListener('click', async () => {
+   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+     showMessage('الكاميرا غير متاحة في هذا المتصفح. يمكنك إدخال رقم التحقق يدويًا.');
+     return;
+   }
+   if (!('BarcodeDetector' in window)) {
+     showMessage('مسح QR بالكاميرا غير مدعوم على هذا المتصفح. يمكنك استخدام كاميرا الهاتف لفتح رمز QR مباشرة أو إدخال رقم التحقق يدويًا.', 'info');
+     return;
+   }
+   try {
+     const formats = await BarcodeDetector.getSupportedFormats();
+     if (!formats.includes('qr_code')) throw new Error('QR not supported');
+     detector = new BarcodeDetector({formats:['qr_code']});
+     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+     video.srcObject = stream;
+     overlay.classList.add('open');
+     overlay.setAttribute('aria-hidden', 'false');
+     scannerNote.textContent = 'ضع رمز QR داخل الإطار حتى تتم قراءته تلقائيًا.';
+     await video.play();
+     scanning = true;
+     requestAnimationFrame(scanLoop);
+   } catch (_) {
+     await stopScanner();
+     showMessage('تعذر تشغيل الكاميرا أو قراءة QR. اسمح للموقع باستخدام الكاميرا أو أدخل رقم التحقق يدويًا.');
+   }
+ });
+
+ closeButton.addEventListener('click', stopScanner);
+ overlay.addEventListener('click', (event) => { if (event.target === overlay) stopScanner(); });
+ document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && overlay.classList.contains('open')) stopScanner(); });
+})();
+</script>
 </body>
 </html>
